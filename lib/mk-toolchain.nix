@@ -20,6 +20,12 @@ in let
 
         rm $out/lib/rustlib/{components,install.log,manifest-*,rust-installer-version,uninstall.sh} || true
 
+        ${lib.optionalString (component == "llvm-tools-preview") ''
+          install $out/lib/rustlib/*/lib/* $out/lib
+          mkdir -p $out/bin
+          install -D $out/lib/rustlib/*/bin/* $out/bin
+        ''}
+
         if [ -d $out/bin ]; then
           for file in $(find $out/bin -type f); do
             if isELF "$file"; then
@@ -44,6 +50,8 @@ in let
             --set-rpath ${toolchain.rustc}/lib:${rpath} \
             $out/bin/clippy-driver
         ''}
+
+
       '';
       dontStrip = true;
       meta.platforms = lib.platforms.all;
